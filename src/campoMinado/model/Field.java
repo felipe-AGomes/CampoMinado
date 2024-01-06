@@ -7,10 +7,10 @@ import campoMinado.model.enums.FieldEvent;
 import campoMinado.model.interfaces.FieldListener;
 
 public class Field {
+	private int qntBombClose = 0;
 	private boolean opened = false;
 	private boolean bomb = false;
 	private boolean marked = false;
-	private int qntBombClose = 0;
 	private List<Field> fieldsClose = new ArrayList<Field>();
 	private List<FieldListener> listeners = new ArrayList<FieldListener>();
 
@@ -21,21 +21,39 @@ public class Field {
 		this.bomb = hasBomb;
 	}
 
-	public void setQtdBombClose() {
-		this.qntBombClose = (int) this.fieldsClose.stream().filter(f -> f.isBomb()).count();
-	}
-
 	public int getQntBombClose() {
 		return this.qntBombClose;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("PositionX => %d, PositionY => %d, isBomb => %b, isOpened => %b", this.POSITION.X,
+				this.POSITION.Y, this.bomb, this.opened);
+	}
+
+	public boolean isOpened() {
+		return this.opened;
+	}
+
+	public boolean isBomb() {
+		return this.bomb;
+	}
+
+	public boolean isMarked() {
+		return this.marked;
+	}
+
+	public List<Field> getFieldsClose() {
+		return this.fieldsClose;
+	}
+
+	public void setQtdBombClose() {
+		this.qntBombClose = (int) this.fieldsClose.stream().filter(f -> f.isBomb()).count();
 	}
 
 	public void setFieldsClose(List<Field> fields) {
 		this.fieldsClose.addAll(fields);
 		this.setQtdBombClose();
-	}
-
-	public List<Field> getFieldsClose() {
-		return this.fieldsClose;
 	}
 
 	public void openChainField() {
@@ -55,22 +73,13 @@ public class Field {
 			}
 		}
 	}
-	
+
 	public void openBomb() {
 		this.opened = true;
 	};
-	
+
 	public void noNotifyOpen() {
 		this.opened = true;
-	}
-	
-	private void openUniqueField() {
-		if (this.isOpened() || this.isMarked()) {
-			return;
-		}
-
-		this.opened = true;
-		this.notifyListeners(FieldEvent.OPEN);
 	}
 
 	public void openField() {
@@ -78,27 +87,18 @@ public class Field {
 			return;
 		}
 
-
 		if (this.isBomb()) {
 			this.notifyListeners(FieldEvent.EXPLOSION);
 			return;
 		}
-		
+
 		if (this.getQntBombClose() == 0) {
 			this.openChainField();
 		} else {
 			this.openUniqueField();
 		}
-		
-		this.notifyListeners(FieldEvent.OPEN);		
-	}
 
-	public boolean isOpened() {
-		return this.opened;
-	}
-
-	public boolean isBomb() {
-		return this.bomb;
+		this.notifyListeners(FieldEvent.OPEN);
 	}
 
 	public void toggleMarked() {
@@ -108,16 +108,6 @@ public class Field {
 
 		this.marked = !this.marked;
 		this.notifyListeners(FieldEvent.MARK);
-	}
-
-	public boolean isMarked() {
-		return this.marked;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("PositionX => %d, PositionY => %d, isBomb => %b, isOpened => %b", this.POSITION.X,
-				this.POSITION.Y, this.bomb, this.opened);
 	}
 
 	public void addEventListener(FieldListener board) {
@@ -137,5 +127,14 @@ public class Field {
 				listener.onOpenFieldEvent(this);
 			}
 		}
+	}
+
+	private void openUniqueField() {
+		if (this.isOpened() || this.isMarked()) {
+			return;
+		}
+
+		this.opened = true;
+		this.notifyListeners(FieldEvent.OPEN);
 	}
 }

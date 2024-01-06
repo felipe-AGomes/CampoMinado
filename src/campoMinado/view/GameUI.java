@@ -57,7 +57,7 @@ public class GameUI {
 			// Definir os indíces das colunas
 			if (i == 0) {
 				table.append(" ");
-				for (int j = 0; j < this.BOARD.BOARD_WIDTH; j++) {
+				for (int j = 0; j < this.BOARD.getWidth(); j++) {
 					int a = (int) 'A';
 					char charIndex = (char) (a + j);
 

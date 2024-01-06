@@ -16,33 +16,18 @@ public class GameController implements BoardListener {
 	private Board board;
 	private GameUI gameUi;
 
-	private Difficulty choseDifficulty() {
-		String userResponse;
-		Matcher matcher;
-		Pattern pattern = Pattern.compile("[1-3]");
+	public GameController(GameUI gameUi, Board board) {
+		this.gameUi = gameUi;
+		this.board = board;
 
-		do {
-			userResponse = this.gameUi.requestDifficulty();
-			matcher = pattern.matcher(userResponse);
-		} while (!matcher.find());
+		Difficulty difficulty = this.choseDifficulty();
 
-		switch (userResponse) {
-		case "1":
-			return Difficulty.EASY;
-		case "2":
-			return Difficulty.MODERATE;
-		default:
-			return Difficulty.HARD;
-		}
+		this.board.setDifficulty(difficulty);
+		this.gameUi.setBoard(board);
 	}
 
 	public void start() {
-		this.gameUi = new GameUI();
-		Difficulty difficulty = this.choseDifficulty();
-		this.board = new Board(difficulty);
-		this.gameUi.setBoard(board);
 		this.gameUi.drawBoard();
-		
 		this.board.addEventListener(this);
 
 		this.gameLoop();
@@ -57,8 +42,29 @@ public class GameController implements BoardListener {
 			} else {
 				this.board.toggleField(position);
 			}
-			
 		}
+	}
+
+	@Override
+	public void onLoseBoardEvent(Field field) {
+		this.gameOver = true;
+		this.gameUi.gameOver(field);
+	}
+
+	@Override
+	public void onMarkBoardEvent(Field field) {
+		this.gameUi.markField(field);
+	}
+
+	@Override
+	public void onOpenBoardEvent(Field field) {
+		this.gameUi.openField(field);
+	}
+
+	@Override
+	public void onWinBoardEvent(Field field) {
+		this.gameWin = true;
+		this.gameUi.gameWin(field);
 	}
 
 	private int markOrOpenField() {
@@ -99,25 +105,23 @@ public class GameController implements BoardListener {
 		return characterAsc - aAsci;
 	}
 
-	@Override
-	public void onLoseBoardEvent(Field field) {
-		this.gameOver = true;
-		this.gameUi.gameOver(field);
-	}
+	private Difficulty choseDifficulty() {
+		String userResponse;
+		Matcher matcher;
+		Pattern pattern = Pattern.compile("[1-3]");
 
-	@Override
-	public void onMarkBoardEvent(Field field) {
-		this.gameUi.markField(field);
-	}
+		do {
+			userResponse = this.gameUi.requestDifficulty();
+			matcher = pattern.matcher(userResponse);
+		} while (!matcher.find());
 
-	@Override
-	public void onOpenBoardEvent(Field field) {
-		this.gameUi.openField(field);
-	}
-
-	@Override
-	public void onWinBoardEvent(Field field) {
-		this.gameWin = true;
-		this.gameUi.gameWin(field);
+		switch (userResponse) {
+		case "1":
+			return Difficulty.EASY;
+		case "2":
+			return Difficulty.MODERATE;
+		default:
+			return Difficulty.HARD;
+		}
 	}
 }
